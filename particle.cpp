@@ -17,7 +17,7 @@ public:
     particle(long double arg1, long double mass, long double position[3], long double velocity[3], std::string species_name, int species_identifier);
     ~particle();
     void particle::print_properties(particle);
-    std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y);
+    std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y,double dx,double dy,double density);
 };
 
 particle::particle()
@@ -54,7 +54,8 @@ void particle::print_properties(particle arg1)
     cout << "species_identifier = " << arg1.species_identifier << endl;
 }
 
-std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y)
+std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y,double dx,double dy,double density)
 {
+    std::vector <particle> V;
 
 }
