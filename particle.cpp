@@ -6,56 +6,91 @@
 class particle
 {
 private:
-    long double charge;
-    long double mass;
-    long double position[3];
-    long double velocity[3];
-    std::string species_name;
-    int species_identifier;
+
 public:
+    std::vector <long double> position;
+    std::vector <long double> velocity;
+    std::vector <long double> GetPosition(){return position;}
+    void SetPosition(std::vector <long double> position){position = position;}
+    std::vector <long double> GetVelocity(){return velocity;}
+    void SetVelocity(std::vector <long double> velocity){velocity = velocity;}
     particle();
-    particle(long double arg1, long double mass, long double position[3], long double velocity[3], std::string species_name, int species_identifier);
-    ~particle();
-    void particle::print_properties(particle);
-    std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y,double dx,double dy,double density);
+    particle(long double, long double);
+    ~particle();  
 };
 
+//Define default Constructer
 particle::particle()
 {
-    charge = 0;
-    mass = 1;
-    position[0] = 0;    position[1] = 0;    position[2] = 0;
-    velocity[0] = 0;    velocity[1] = 0;    velocity[2] = 0;
-    species_name = "unnamed";
-    species_identifier = 0;
+    std::vector <long double> position (2,0.0);
+    std::vector <long double> velocity (2,0.0);
+    std::cout << " A particle is created" << std::endl;
 }
 
-particle::particle(long double arg1, long double arg2,long double arg3[3], long double arg4[3], std::string arg5, int arg6)
+//Parameterized Constructor
+particle::particle(long double charge, long double mass)
 {
-    charge = arg1;
-    mass = arg2;
-    position[0] = arg3[0];    position[1] = arg3[1];    position[2] = arg3[2];
-    velocity[0] = arg4[0];    velocity[1] = arg4[1];    velocity[2] = arg4[2];
-    species_name = arg5;
-    species_identifier = arg6;
+    std::vector <long double> position (2,0.0);
+    std::vector <long double> velocity (2,0.0);
+    std::cout << " A parametrized particle is created" << std::endl;
 }
 
 particle::~particle()
 {
+    std::cout << " A particle is destroyed";
 }
 
-void particle::print_properties(particle arg1)
+
+
+class species: public particle
+{
+private:
+    std::string species_name;
+    int species_identifier;
+    long double charge;
+    long double mass;
+
+public:
+    species(): particle(){};
+    species(std::string, int, long double, long double);
+    ~species();
+    long double GetCharge(){return charge;}
+    void SetCharge(long double charge){this->charge=charge;}
+    long double GetMass(){return mass;}
+    void SetMass(long double mass){this->mass = mass;}
+    void print_properties();
+};
+
+species::species(std::string species_name , int species_identifier, long double charge,
+long double mass) : particle()
+{
+    this->species_name = species_name;
+    this->species_identifier = species_identifier;
+    this->charge = charge;
+    this->mass = mass;
+    std::cout << " A parametrized species is created" << std::endl;
+}
+
+species::~species()
+{
+}
+
+void species::print_properties()
 {
     using std::cout;
     using std::endl;
-    cout << "charge = " << arg1.charge << endl;
-    cout << "mass = " << arg1.mass << endl;
-    cout << "species_name = " << arg1.species_name << endl;
-    cout << "species_identifier = " << arg1.species_identifier << endl;
+    cout << "charge = " << this->charge << endl;
+    cout << "mass = " << this->mass << endl;
+    cout << "position_x = " << this->position[0]<<endl;
+    cout << "velocity_x = " << this->velocity[0]<<endl;
 }
-
-std::vector <particle> particle::load_particles(double min_x,double max_x,double min_y,double max_y,double dx,double dy,double density)
+int main()
 {
-    std::vector <particle> V;
-
+    //long double chrg = 1.983742974237498;
+    //long double mas = 116.92847928349292;
+    species elec();
+    particle p;
+    p.position[0];
+    //ion.print_properties();
+    return 0;
 }
