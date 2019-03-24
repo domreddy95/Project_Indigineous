@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 #include <stdlib.h>
+#include <random>
 
 class particle
 {
@@ -147,7 +148,27 @@ std::vector <species> load_species (double min_dim1, double max_dim1, double min
     return temp_array1;
 }
 
+void set_thermal_velocity(std::vector <species> &species_array, double thermal_velocity = 0, int seed = 4444)
+{   
+    std::default_random_engine e(seed);
+    std::normal_distribution <double> distrN (1.0,1.0);
+    int N = species_array.size();
+    for (int i=0; i<N; i++)
+    {
+        species_array[i].velocity[0] = distrN(e)*thermal_velocity;
+        species_array[i].velocity[1] = distrN(e)*thermal_velocity;
+    }
+}
 
+void set_beam_velocity(std::vector <species> &species_array, std::vector <double> &beam_velocity)
+{   
+    int N = species_array.size();
+    for (int i=0; i<N; i++)
+    {
+        species_array[i].velocity[0] += beam_velocity[0];
+        species_array[i].velocity[1] += beam_velocity[1];
+    }
+}
 
 int main()
 {
@@ -159,8 +180,9 @@ int main()
     //electron.SetMass(0);
     //electron.print_properties();
     electrons = load_species(0,1,1,2,10000);
+    set_temperature(electrons,10);
     std::cout << electrons.size() << std::endl;
-    std::cout << electrons[0].position[1];
+    std::cout << electrons[0].velocity[1];
     //value = electron.position[0];
     //std::cout << value << std::endl;
     //electron.position[0] = 1;
