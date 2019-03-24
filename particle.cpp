@@ -170,8 +170,6 @@ void set_beam_velocity(std::vector <species> &species_array, std::vector <double
     }
 }
 
-
-
 int main()
 {
     //double value;
