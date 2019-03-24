@@ -53,3 +53,7 @@ std::vector< std::vector<mesh> > CreateMesh(double min_dim1, double max_dim1, do
     return temp_array2;
 }
 
+void calc_nodal_volume(double min_dim1, double max_dim1, double min_dim2, double max_dim2)
+{
+    
+}

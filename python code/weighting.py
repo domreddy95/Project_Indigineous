@@ -73,9 +73,9 @@ def Weighting(xx,yy,nv,N):
     return G
 
 nodalvolume(nodal_volume)
-#print(nodal_volume)
-weighting(grid,X,Y,nodal_volume)
-rho = Weighting(Pz,Pr,nodal_volume,N)
+print(nodal_volume)
+#weighting(grid,X,Y,nodal_volume)
+#rho = Weighting(Pz,Pr,nodal_volume,N)
 #print(np.sum(nodal_volume))
 #print(np.sum(grid))
 #print(np.sum(rho))
