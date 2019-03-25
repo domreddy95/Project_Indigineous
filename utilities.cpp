@@ -102,6 +102,12 @@ void species::print_properties()
 
 class mesh
 {
+//private:
+//    int num_dim1;
+//    int num_dim2;
+//    double h_dim1;
+//    double h_dim2;
+//    
 public:
     double charge;
     double nodal_volume;
@@ -201,13 +207,13 @@ void set_beam_velocity(std::vector <species> &species_array, std::vector <double
 std::vector< std::vector<mesh> > CreateMesh(double min_dim1, double max_dim1, double min_dim2, double max_dim2, int num1, int num2)
 {
     std::vector< std::vector<mesh> > temp_array2;
-    temp_array2.reserve(num1);
+    temp_array2.reserve(num1+2);
 
-    for (int i=0;i<num1;i++)
+    for (int i=0;i<num1+2;i++)
     {
         std::vector<mesh> temp_array;
-        temp_array.reserve(num2);
-        for (int j=0;j<num2;j++)
+        temp_array.reserve(num2+2);
+        for (int j=0;j<num2+2;j++)
         {
             temp_array.emplace_back(mesh());
         }
@@ -219,16 +225,16 @@ std::vector< std::vector<mesh> > CreateMesh(double min_dim1, double max_dim1, do
 
 void calc_nodal_volume(std::vector< std::vector<mesh> > &mesh_array, double min_dim2, double h_dim1, double h_dim2, int num1, int num2)
 {
-    for (int i=0;i<num1;i++)
+    for (int i=1;i<num1+1;i++)
     {
-        for (int j=0;j<num2;j++)
+        for (int j=1;j<num2+1;j++)
         {
-            double j_min = j-0.5;
-            double j_max = j+0.5;
+            double j_min = (j-1)-0.5;
+            double j_max = (j-1)+0.5;
             if (j_min<0){j_min=0;}
-            if (j_max>num2-1){j_max=num2-1;}
+            if (j_max>num2){j_max=num2;}
             double factor;
-            if (i == 0 || i == num1-1){factor = 0.5;}
+            if (i == 1 || i == num1){factor = 0.5;}
             else{factor = 1;}
             double r_min = min_dim2 + (h_dim2*j_min);
             double r_max = min_dim2 + (h_dim2*j_max);
@@ -238,13 +244,46 @@ void calc_nodal_volume(std::vector< std::vector<mesh> > &mesh_array, double min_
     
 }
 
-int main()
+void charge_weighting(std::vector< std::vector<mesh>> &mesh_arr, std::vector<species> &species_arr,
+double min_dim1, double min_dim2, double h_dim1, double h_dim2, int num1, int num2)
 {
-    std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
-    std::cout << grid.size() << std::endl;
-    calc_nodal_volume(grid,0,0.1,0.1,21,11);
-    std::cout << grid[0][9].nodal_volume << std::endl;
-    std::cout << grid[10][9].nodal_volume << std::endl;
-    std::cout << grid[20][9].nodal_volume << std::endl;
-    return 0;
+    for (int i=1;i<num1+1;i++)
+    {    
+        for (int j=1;j<num2+1;j++)
+        {
+            mesh_arr[i][j].charge = 0;
+        }
+        
+    }
+    
+    int n = species_arr.size();
+    double particle_charge = species_arr[0].GetCharge();
+    for (int i=5000; i<5001; i++)
+    {
+        double px = species_arr[i].position[0] - min_dim1;
+        double py = species_arr[i].position[1] - min_dim2;
+        int ix0 = px/h_dim1;
+        int iy0 = py/h_dim2;
+        int ix1 = ix0 + 1;
+        int iy1 = iy0 + 1;
+        double hx = ((px/h_dim1)-ix0);
+        double hy = ((py/h_dim2)-iy0);
+        mesh_arr[ix0][iy0].charge += (1-hx)*(1-hy)*particle_charge;
+        mesh_arr[ix1][iy0].charge += hx*(1-hy)*particle_charge;
+        mesh_arr[ix0][iy1].charge += (1-hx)*hy*particle_charge;
+        mesh_arr[ix1][iy1].charge += hx*hy*particle_charge;
+    }
 }
+
+//int main()
+//{
+//    std::vector<std::vector<mesh>> grid = CreateMesh(1,3,1,2,21,11);
+//    std::vector <species> electrons = load_species(1,3,1,2,10000);
+//    double x = electrons[5000].position[0];
+//    double y = electrons[5000].position[1];
+//    std::cout << "x = " << x << std::endl;
+//    std::cout << "y = " << y << std::endl;
+//    charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
+//    calc_nodal_volume(grid,0,0.1,0.1,21,11);
+//    return 0;
+//}
