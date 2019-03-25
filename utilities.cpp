@@ -72,7 +72,7 @@ species::species() : particle()
     this->charge = 0;
     this->mass = 0;
     //std::cout << " A species particle is created" << std::endl;
-};
+}
 
 
 species::species(std::string species_name , int species_identifier, double charge,
@@ -258,7 +258,7 @@ double min_dim1, double min_dim2, double h_dim1, double h_dim2, int num1, int nu
     
     int n = species_arr.size();
     double particle_charge = species_arr[0].GetCharge();
-    for (int i=5000; i<5001; i++)
+    for (int i=0; i<n; i++)
     {
         double px = species_arr[i].position[0] - min_dim1;
         double py = species_arr[i].position[1] - min_dim2;
@@ -361,27 +361,44 @@ void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, doub
     
 }
 
+void calculate_electric_feild(std::vector< std::vector<mesh>> &mesh_arr, double h_dim1, double h_dim2)
+{
+    int num1 = mesh_arr.size() - 2;
+    int num2 = mesh_arr[0].size() - 2;
 
-//int main()
-//{
-//    std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
-//    std::vector <species> electrons = load_species(1,3,1,2,10000);
-//    double x = electrons[5000].position[0];
-//    double y = electrons[5000].position[1];
-//    std::cout << "x = " << x << std::endl;
-//    std::cout << "y = " << y << std::endl;
-//    charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
-//    calc_nodal_volume(grid,0,0.1,0.1,21,11);
-//    for (int i=0;i<50001;i++)
-//    {
-//        possion_solve(grid,0.1,0.1,1,1.5);
-//    }
-//    int num1 = 21;
-//    int num2 = 11;
-//    
-//    for (int i=0;i<13;i++)
-//    {
-//    std::cout << "v = " << grid[0][i].potential << std::endl;
-//    }
-//    return 0;
-//}
+    for (int i=1;i<num1+1;i++)
+    {    
+        for (int j=1;j<num2+1;j++)
+        {
+            mesh_arr[i][j].electric_feild[0] = (mesh_arr[i+1][j].potential - mesh_arr[i-1][j].potential)/(2*h_dim1);
+            mesh_arr[i][j].electric_feild[1] = (mesh_arr[i][j+1].potential - mesh_arr[i][j-1].potential)/(2*h_dim2);
+        }  
+    }
+}
+
+
+
+
+/*int main()
+{
+    std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
+    //std::vector <species> electrons = load_species(1,3,1,2,10000);
+    //double x = electrons[5000].position[0];
+    //double y = electrons[5000].position[1];
+    //std::cout << "x = " << x << std::endl;
+    //std::cout << "y = " << y << std::endl;
+    //charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
+    calc_nodal_volume(grid,0,0.1,0.1,21,11);
+    for (int i=0;i<50001;i++)
+    {
+        possion_solve(grid,0.1,0.1,1,1.5);
+    }
+    int num1 = 21;
+    int num2 = 11;
+    calculate_electric_feild(grid,0.1,0.1);
+    for (int i=0;i<13;i++)
+    {
+    std::cout << "v = " << grid[5][i].electric_feild[1] << std::endl;
+    }
+    return 0;
+}

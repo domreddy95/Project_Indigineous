@@ -197,8 +197,8 @@ def ghost_cell(phi1):
 def elec(phi1,elecZ,elecR):
     for i in range (0,nz+1):
         for j in range (0,nr+1):
-            elecZ[i,j] = (phi1[i,j] - phi1[i+2,j])/(2.0*dz)
-            elecR[i,j] = (phi1[i,j] - phi1[i,j+2])/(2.0*dr)
+            elecZ[i+1,j] = (phi1[i,j] - phi1[i+2,j])/(2.0*dz)
+            elecR[i,j+1] = (phi1[i,j] - phi1[i,j+2])/(2.0*dr)
 
 @jit(nopython=True)
 def interpolate_elec(Ex,Ey,xx,yy,eex,eey,N):
