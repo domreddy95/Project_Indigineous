@@ -278,30 +278,52 @@ double min_dim1, double min_dim2, double h_dim1, double h_dim2, int num1, int nu
 
 void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, double h_dim2, double epsilon, double w)
 {
-    int num1 = mesh_arr.size - 2;
-    int num2 = mesh_arr[0].size - 2;
+    int num1 = mesh_arr.size() - 2;
+    int num2 = mesh_arr[0].size() - 2;
 
+    for (int j=1;j<num2+1;j++)
+    {
+        mesh_arr[1][j].potential = 200;       // SET LEFT BOUNDARY CONDITIONS
+    }
+    
+    for (int j=1;j<num2+1;j++)
+    {
+        mesh_arr[num1][j].potential = -200;    // SET RIGHT BOUNDARY CONDITIONS
+    }
+
+    for (int i=0;i<num1+2;i++)
+    {
+        mesh_arr[i][1].potential = mesh_arr[i][2].potential;
+    }
+
+    for (int i=0;i<num1+2;i++)
+    {
+        mesh_arr[i][num2].potential = mesh_arr[i][num2-1].potential;
+    }
+    
     for (int i=2;i<num1;i++)
     {    
-        for (int j=1;j<num2;j++)
+        for (int j=2;j<num2;j++)
         {
             if ((i+j)%2 == 0)
             {
                 double prev = mesh_arr[i][j].potential;
                 double t1 = mesh_arr[i][j].charge/mesh_arr[i][j].nodal_volume/epsilon;
+                //std::cout << "v = " << t1 << std::endl;
                 double t2 = (mesh_arr[i][j+1].potential + mesh_arr[i][j-1].potential)/(h_dim2*h_dim2);
                 double t3 = (mesh_arr[i][j+1].potential - mesh_arr[i][j-1].potential)/(2.0*h_dim2*h_dim2*(j-1));
                 double t4 = (mesh_arr[i+1][j].potential + mesh_arr[i-1][j].potential)/(h_dim1*h_dim1);
                 double t5 = (2.0/(h_dim2*h_dim2)) + (2.0/(h_dim1*h_dim1));
-                mesh_arr[i][j].potential = prev + w*(((t1+t2+t3+t4)/t5)-prev);
+                mesh_arr[i][j].potential = prev + w*(((t1+t2+t4+t3)/t5)-prev);
+                
             }
         }
         
     }
-
+    
     for (int i=2;i<num1;i++)
     {    
-        for (int j=1;j<num2;j++)
+        for (int j=2;j<num2;j++)
         {
             if ((i+j)%2 != 0)
             {
@@ -316,25 +338,25 @@ void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, doub
         }
         
     }
+    
+    for (int i=1;i<num1+1;i++)
+    {
+        mesh_arr[i][0].potential = 2.0*mesh_arr[i][1].potential - mesh_arr[i][2].potential;
+    }
+
+    for (int i=1;i<num1+1;i++)
+    {
+        mesh_arr[i][num2+1].potential = (2.0*mesh_arr[i][num2].potential) - (mesh_arr[i][num2-1].potential);
+    }
+
+    for (int j=0;j<num2+2;j++)
+    {
+        mesh_arr[num1+1][j].potential = 2.0*mesh_arr[num1][j].potential - mesh_arr[num1-1][j].potential;
+    }
 
     for (int j=0;j<num2+2;j++)
     {
         mesh_arr[0][j].potential = 2.0*mesh_arr[1][j].potential - mesh_arr[2][j].potential;
-    }
-
-    for (int j=0;j<num2+2;j++)
-    {
-        mesh_arr[num1+2][j].potential = 2.0*mesh_arr[num1+1][j].potential - mesh_arr[num1][j].potential;
-    }
-
-    for (int i=0;i<num1+2;i++)
-    {
-        mesh_arr[i][0].potential = 2.0*mesh_arr[i][1].potential - mesh_arr[1][2].potential;
-    }
-
-    for (int i=0;i<num1+2;i++)
-    {
-        mesh_arr[i][num2+2].potential = 2.0*mesh_arr[i][num2+1].potential - mesh_arr[1][num2].potential;
     }
     
 }
@@ -342,7 +364,7 @@ void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, doub
 
 //int main()
 //{
-//    std::vector<std::vector<mesh>> grid = CreateMesh(1,3,1,2,21,11);
+//    std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
 //    std::vector <species> electrons = load_species(1,3,1,2,10000);
 //    double x = electrons[5000].position[0];
 //    double y = electrons[5000].position[1];
@@ -350,5 +372,16 @@ void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, doub
 //    std::cout << "y = " << y << std::endl;
 //    charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
 //    calc_nodal_volume(grid,0,0.1,0.1,21,11);
+//    for (int i=0;i<50001;i++)
+//    {
+//        possion_solve(grid,0.1,0.1,1,1.5);
+//    }
+//    int num1 = 21;
+//    int num2 = 11;
+//    
+//    for (int i=0;i<13;i++)
+//    {
+//    std::cout << "v = " << grid[0][i].potential << std::endl;
+//    }
 //    return 0;
 //}
