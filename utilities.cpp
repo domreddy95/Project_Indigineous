@@ -105,7 +105,6 @@ class mesh
 public:
     double charge;
     double nodal_volume;
-    double charge_density;
     double potential;
     std::vector <double> electric_feild;
     std::vector <double> magnetic_feild;
@@ -119,7 +118,6 @@ mesh::mesh()
     std::vector <double> magnetic_feild (3,0);
     this->charge = 0;
     this->nodal_volume = 0;
-    this->charge_density = 0;
     this->potential = 0;
     this->electric_feild = electric_feild;
     this->magnetic_feild = magnetic_feild;
@@ -202,23 +200,51 @@ void set_beam_velocity(std::vector <species> &species_array, std::vector <double
 
 std::vector< std::vector<mesh> > CreateMesh(double min_dim1, double max_dim1, double min_dim2, double max_dim2, int num1, int num2)
 {
-    std::vector<mesh> temp_array;
-    temp_array.reserve(num2+1);
     std::vector< std::vector<mesh> > temp_array2;
-    temp_array2.reserve(num1+1);
-    for (int i=0;i==num1;i++)
+    temp_array2.reserve(num1);
+
+    for (int i=0;i<num1;i++)
     {
-        for (int j=0;j==num2;j++)
+        std::vector<mesh> temp_array;
+        temp_array.reserve(num2);
+        for (int j=0;j<num2;j++)
         {
             temp_array.emplace_back(mesh());
         }
         temp_array2.emplace_back(temp_array);
     }
-
+    
     return temp_array2;
 }
 
-void calc_nodal_volume(double min_dim1, double max_dim1, double min_dim2, double max_dim2)
+void calc_nodal_volume(std::vector< std::vector<mesh> > &mesh_array, double min_dim2, double h_dim1, double h_dim2, int num1, int num2)
 {
+    for (int i=0;i<num1;i++)
+    {
+        for (int j=0;j<num2;j++)
+        {
+            double j_min = j-0.5;
+            double j_max = j+0.5;
+            if (j_min<0){j_min=0;}
+            if (j_max>num2-1){j_max=num2-1;}
+            double factor;
+            if (i == 0 || i == num1-1){factor = 0.5;}
+            else{factor = 1;}
+            double r_min = min_dim2 + (h_dim2*j_min);
+            double r_max = min_dim2 + (h_dim2*j_max);
+            mesh_array[i][j].nodal_volume = factor*h_dim1*((r_max*r_max)-(r_min*r_min));
+        }
+    }
     
+}
+
+int main()
+{
+    std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
+    std::cout << grid.size() << std::endl;
+    calc_nodal_volume(grid,0,0.1,0.1,21,11);
+    std::cout << grid[0][9].nodal_volume << std::endl;
+    std::cout << grid[10][9].nodal_volume << std::endl;
+    std::cout << grid[20][9].nodal_volume << std::endl;
+    return 0;
 }
