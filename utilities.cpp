@@ -3,6 +3,7 @@
 #include <string>
 #include <stdlib.h>
 #include <random>
+#include <time.h>
 
 class particle;
 class species;// public particle;
@@ -309,7 +310,6 @@ void possion_solve(std::vector< std::vector<mesh>> &mesh_arr,double h_dim1, doub
             {
                 double prev = mesh_arr[i][j].potential;
                 double t1 = mesh_arr[i][j].charge/mesh_arr[i][j].nodal_volume/epsilon;
-                //std::cout << "v = " << t1 << std::endl;
                 double t2 = (mesh_arr[i][j+1].potential + mesh_arr[i][j-1].potential)/(h_dim2*h_dim2);
                 double t3 = (mesh_arr[i][j+1].potential - mesh_arr[i][j-1].potential)/(2.0*h_dim2*h_dim2*(j-1));
                 double t4 = (mesh_arr[i+1][j].potential + mesh_arr[i-1][j].potential)/(h_dim1*h_dim1);
@@ -376,29 +376,62 @@ void calculate_electric_feild(std::vector< std::vector<mesh>> &mesh_arr, double 
     }
 }
 
-
-
-
-/*int main()
+void boris_pusher(std::vector <species> &species_arr,std::vector< std::vector<mesh>> &mesh_arr, double min_dim1, double min_dim2,
+double h_dim1, double h_dim2 , double time_step)
 {
+    int num = species_arr.size();
+    for (int i=0; i<1; i++)
+    {   
+        double px = species_arr[i].position[0] - min_dim1;
+        double py = species_arr[i].position[1] - min_dim2;
+        int ix0 = px/h_dim1;
+        int iy0 = py/h_dim2;
+        int ix1 = ix0 + 1;
+        int iy1 = iy0 + 1;
+        double hx = ((px/h_dim1)-ix0);
+        double hy = ((py/h_dim2)-iy0);
+        double a = (1-hx)*(1-hy);
+        double b = hx*(1-hy);
+        double c = (1-hx)*hy;
+        double d = hx*hy;
+        double val0 = a*mesh_arr[ix0][iy0].electric_feild[0];
+        double val1 = b*mesh_arr[ix1][iy0].electric_feild[0];
+        double val2 = c*mesh_arr[ix0][iy1].electric_feild[0];
+        double val3 = d*mesh_arr[ix1][iy1].electric_feild[0];
+        double E0 = (val0+val1+val2+val3);
+        val0 = a*mesh_arr[ix0][iy0].electric_feild[1];
+        val1 = b*mesh_arr[ix1][iy0].electric_feild[1];
+        val2 = c*mesh_arr[ix0][iy1].electric_feild[1];
+        val3 = d*mesh_arr[ix1][iy1].electric_feild[1];
+        double E1 = (val0+val1+val2+val3);
+        //std::cout << "print" << std::endl;
+        double particle_chrg = species_arr[i].GetCharge();
+        double particle_mass= species_arr[i].GetMass();
+        species_arr[i].position[0] += species_arr[i].velocity[0]*time_step;
+        species_arr[i].position[1] += species_arr[i].velocity[1]*time_step;
+        species_arr[i].velocity[0] += particle_chrg*E0*time_step/particle_mass;
+        species_arr[i].velocity[1] += particle_chrg*E1*time_step/particle_mass;
+    }
+
+}
+
+int main()
+{
+    time_t start, end;
     std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
-    //std::vector <species> electrons = load_species(1,3,1,2,10000);
-    //double x = electrons[5000].position[0];
-    //double y = electrons[5000].position[1];
-    //std::cout << "x = " << x << std::endl;
-    //std::cout << "y = " << y << std::endl;
-    //charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
+    std::vector <species> electrons = load_species(1,3,1,2,2000000);
+    start = clock();
+    charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
     calc_nodal_volume(grid,0,0.1,0.1,21,11);
-    for (int i=0;i<50001;i++)
+    for (int i=0;i<5001;i++)
     {
         possion_solve(grid,0.1,0.1,1,1.5);
     }
-    int num1 = 21;
-    int num2 = 11;
     calculate_electric_feild(grid,0.1,0.1);
-    for (int i=0;i<13;i++)
-    {
-    std::cout << "v = " << grid[5][i].electric_feild[1] << std::endl;
-    }
+    boris_pusher(electrons,grid,0,0,0.1,0.1,0.1);
+    std::cout << "print" << std::endl;
+    end = clock();
+    double time_taken = double(end - start);
+    std::cout << "runtime = " << time_taken / CLOCKS_PER_SEC << "sec" << "\n";
     return 0;
 }
