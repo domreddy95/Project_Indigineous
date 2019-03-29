@@ -405,6 +405,7 @@ double h_dim1, double h_dim2 , double time_step)
         val3 = d*mesh_arr[ix1][iy1].electric_feild[1];
         double E1 = (val0+val1+val2+val3);
         //std::cout << "print" << std::endl;
+        
         double particle_chrg = species_arr[i].GetCharge();
         double particle_mass= species_arr[i].GetMass();
         species_arr[i].position[0] += species_arr[i].velocity[0]*time_step;
@@ -419,9 +420,9 @@ int main()
 {
     time_t start, end;
     std::vector<std::vector<mesh>> grid = CreateMesh(0,2,0,1,21,11);
-    std::vector <species> electrons = load_species(1,3,1,2,2000000);
+    std::vector <species> electrons = load_species(0,2,0,1,2000000);
     start = clock();
-    charge_weighting(grid,electrons,1,1,0.1,0.1,21,11);
+    charge_weighting(grid,electrons,0,0,0.1,0.1,21,11);
     calc_nodal_volume(grid,0,0.1,0.1,21,11);
     for (int i=0;i<5001;i++)
     {
